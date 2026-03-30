@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Index from "./pages/Index";
+import About from "./pages/About";
 import Donate from "./pages/Donate";
 import Volunteer from "./pages/Volunteer";
 import Programs from "./pages/Programs";
