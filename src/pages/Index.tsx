@@ -1,8 +1,15 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Heart, BookOpen, Globe, Users, Sprout, Shield, GraduationCap, Handshake, Droplets, Lightbulb, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SectionHeading from "@/components/SectionHeading";
 import logo from "@/assets/logo.jpg";
+import hero1 from "@/assets/hero-1.png";
+import hero2 from "@/assets/hero-2.png";
+import hero3 from "@/assets/hero-3.jpeg";
+import hero4 from "@/assets/hero-4.jpeg";
+
+const heroImages = [hero1, hero2, hero3, hero4];
 
 const aims = [
   { icon: Heart, text: "Render humanitarian aids and relief materials to communities in distress" },
@@ -25,11 +32,35 @@ const stats = [
   { value: "15+", label: "Partner Organizations" },
 ];
 
-const Index = () => (
+const Index = () => {
+  const [currentImage, setCurrentImage] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImage((prev) => (prev + 1) % heroImages.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
   <div className="pt-16">
     {/* Hero */}
-    <section className="gradient-hero min-h-[85vh] flex items-center relative overflow-hidden">
-      <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, hsl(40 65% 55% / 0.3) 0%, transparent 50%)" }} />
+    <section className="min-h-[85vh] flex items-center relative overflow-hidden">
+      {/* Sliding background images */}
+      {heroImages.map((img, i) => (
+        <div
+          key={i}
+          className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+          style={{
+            backgroundImage: `url(${img})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            opacity: currentImage === i ? 1 : 0,
+          }}
+        />
+      ))}
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-[hsl(var(--navy-dark)/0.75)]" />
       <div className="container mx-auto px-4 py-20 relative z-10">
         <div className="max-w-3xl animate-fade-up">
           <img src={logo} alt="WEO Logo" className="h-24 w-24 rounded-full mb-8 shadow-xl border-2 border-gold/30" />
@@ -51,10 +82,21 @@ const Index = () => (
               <Link to="/programs">Our Programs</Link>
             </Button>
           </div>
+          {/* Slide indicators */}
+          <div className="flex gap-2 mt-8">
+            {heroImages.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentImage(i)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  currentImage === i ? "w-8 bg-[hsl(var(--gold))]" : "w-2 bg-white/40"
+                }`}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>
-
     {/* Stats */}
     <section className="bg-card border-b border-border">
       <div className="container mx-auto px-4 py-12">
