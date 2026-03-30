@@ -6,6 +6,7 @@ import logo from "@/assets/logo.jpg";
 
 const navLinks = [
   { label: "Home", path: "/" },
+  { label: "About", path: "/about" },
   { label: "Programs", path: "/programs" },
   { label: "Volunteer", path: "/volunteer" },
   { label: "Donate", path: "/donate" },
