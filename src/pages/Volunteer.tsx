@@ -71,16 +71,39 @@ const Volunteer = () => {
         </section>
       )}
 
-      {/* Emotional Pull */}
+      {/* Call to Volunteer */}
       <section className="py-16 bg-secondary">
-        <div className="container mx-auto px-4 max-w-2xl text-center">
-          <p className="text-lg text-secondary-foreground italic leading-relaxed">
-            Imagine mentoring a young person who later becomes a leader.
-            Imagine helping distribute food to families who haven't eaten all day.
-          </p>
-          <p className="text-gold font-heading font-bold text-xl mt-6">
-            👉 That impact starts with you.
-          </p>
+        <div className="container mx-auto px-4 max-w-4xl text-center space-y-6">
+          <SectionHeading title="A Call to Volunteer" />
+          <div className="text-secondary-foreground text-base md:text-lg leading-relaxed space-y-5 text-left md:text-center mx-auto">
+            <p>
+              Guided by purpose, driven by compassion our core commitments to building a better world is sacrosanct.
+            </p>
+            <p>
+              Founded by Professor Enlighten Peter since 2003, World Enlighten Organization has been transforming lives through humanitarian aid, education, youth empowerment, and sustainable development.
+            </p>
+            <p>
+              We are a global collective of scholars, professionals and activists.
+            </p>
+            <p>
+              We insight bold ideas, deep thinking, help people live without sickness, solve health issues around us and create brilliant opportunities, we inspire everyone to think aloud with forward mindset reorientation, perspective expansion and inspirational uplifting. 
+            </p>
+            <p className="font-heading font-bold text-gold text-2xl py-2">
+              Improve your life with us today!
+            </p>
+            <p>
+              We are currently building a formidable global community of philanthropists. 
+            </p>
+            <p>
+              Millions of people all over the world are sleeping without food and basic amenities of life and with this God given passion to salvage humanity to the best of our abilities, we have decided to come together to become one people with one voice, helping one another and others that can not help themselves. 
+            </p>
+            <p>
+              We contribute our resources, physically, spiritually, mentally, financially and otherwise to help the world become a better place.
+            </p>
+            <p className="font-semibold text-navy dark:text-gold-light mt-4 p-6 bg-gold/10 border border-gold/20 rounded-xl text-center">
+              Respond to this Clarion call and become a volunteer today to help your community, LGA, State, country or continent become a better place today.
+            </p>
+          </div>
         </div>
       </section>
 
