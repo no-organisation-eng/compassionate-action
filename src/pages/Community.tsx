@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getPosts, createPost, toggleLike, addComment, formatTimeAgo, Post } from '@/lib/posts';
 import { getMemberCount } from '@/lib/auth';
 
-const AvatarBadge = ({ initials, size = 'md', color = 'navy' }: { initials: string; size?: 'sm' | 'md' | 'lg'; color?: string }) => {
+const AvatarBadge = ({ initials, size = 'md' }: { initials: string; size?: 'sm' | 'md' | 'lg'; color?: string }) => {
   const sz = size === 'sm' ? 'h-8 w-8 text-xs' : size === 'lg' ? 'h-12 w-12 text-base' : 'h-10 w-10 text-sm';
   return (
     <div className={`${sz} rounded-full bg-navy text-white flex items-center justify-center font-bold shrink-0 border-2 border-gold/20`}>
@@ -90,26 +90,61 @@ const Community = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [newPost, setNewPost] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [loadingPosts, setLoadingPosts] = useState(true);
+  const [memberCount, setMemberCount] = useState(0);
   const textRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => { setPosts(getPosts()); }, []);
+  // Fetch posts and member count on mount
+  useEffect(() => {
+    const load = async () => {
+      setLoadingPosts(true);
+      const [fetchedPosts, count] = await Promise.all([
+        getPosts(),
+        getMemberCount(),
+      ]);
+      setPosts(fetchedPosts);
+      setMemberCount(count);
+      setLoadingPosts(false);
+    };
+    load();
+  }, []);
 
-  const handlePost = (e: React.FormEvent) => {
+  const handlePost = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPost.trim() || !user) return;
     setSubmitting(true);
-    createPost(user.id, user.name, user.avatar, user.country || 'Nigeria', newPost.trim());
-    setPosts(getPosts());
+    const created = await createPost(user.id, newPost.trim());
+    if (created) {
+      setPosts(prev => [created, ...prev]);
+    }
     setNewPost('');
     setSubmitting(false);
   };
 
-  const handleLike = (postId: string) => { if (user) setPosts(toggleLike(postId, user.id)); };
-  const handleComment = (postId: string, text: string) => {
-    if (user) setPosts(addComment(postId, user.id, user.name, user.avatar, text));
+  const handleLike = async (postId: string) => {
+    if (!user) return;
+    const nowLiked = await toggleLike(postId, user.id);
+    setPosts(prev => prev.map(p => {
+      if (p.id !== postId) return p;
+      return {
+        ...p,
+        likes: nowLiked
+          ? [...p.likes, user.id]
+          : p.likes.filter(id => id !== user.id),
+      };
+    }));
   };
 
-  const memberCount = getMemberCount();
+  const handleComment = async (postId: string, text: string) => {
+    if (!user) return;
+    const comment = await addComment(postId, user.id, text);
+    if (comment) {
+      setPosts(prev => prev.map(p => {
+        if (p.id !== postId) return p;
+        return { ...p, comments: [...p.comments, comment] };
+      }));
+    }
+  };
 
   return (
     <div className="pt-16 min-h-screen bg-background">
@@ -149,8 +184,8 @@ const Community = () => {
             <div className="bg-card rounded-xl border border-border p-5 space-y-3">
               <h3 className="font-heading font-semibold text-navy dark:text-gold-light text-sm">Community Stats</h3>
               {[
-                { icon: Users, label: 'Members', value: `${memberCount + 127}` },
-                { icon: TrendingUp, label: 'Posts this week', value: `${posts.length}` },
+                { icon: Users, label: 'Members', value: `${memberCount}` },
+                { icon: TrendingUp, label: 'Posts', value: `${posts.length}` },
                 { icon: Globe, label: 'Countries', value: '12+' },
               ].map(s => (
                 <div key={s.label} className="flex items-center justify-between text-sm">
@@ -179,15 +214,31 @@ const Community = () => {
                   <div className="flex justify-end">
                     <Button variant="gold" size="sm" type="submit" disabled={!newPost.trim() || submitting}
                       className="flex items-center gap-2">
-                      <Send className="h-3.5 w-3.5" /> Post
+                      <Send className="h-3.5 w-3.5" /> {submitting ? 'Posting...' : 'Post'}
                     </Button>
                   </div>
                 </form>
               </div>
             </div>
 
+            {/* Loading state */}
+            {loadingPosts && (
+              <div className="text-center py-12">
+                <div className="h-8 w-8 border-3 border-gold border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                <p className="text-muted-foreground text-sm">Loading community posts...</p>
+              </div>
+            )}
+
             {/* Posts */}
-            {posts.map(post => (
+            {!loadingPosts && posts.length === 0 && (
+              <div className="text-center py-12 bg-card rounded-xl border border-border">
+                <Users className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground font-medium">No posts yet</p>
+                <p className="text-sm text-muted-foreground mt-1">Be the first to share something with the community!</p>
+              </div>
+            )}
+
+            {!loadingPosts && posts.map(post => (
               <PostCard key={post.id} post={post} currentUserId={user?.id || ''}
                 onLike={handleLike} onComment={handleComment} />
             ))}

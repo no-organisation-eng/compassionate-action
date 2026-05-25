@@ -1,16 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Copy, CheckCircle2, Share2, Users, TrendingUp, Heart, ExternalLink, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { getReferralStats } from '@/lib/donations';
+import { formatNgn } from '@/lib/payment';
 import { toast } from 'sonner';
-import SectionHeading from '@/components/SectionHeading';
 
 const VolunteerDashboard = () => {
   const { user } = useAuth();
   const [copied, setCopied] = useState(false);
+  const [stats, setStats] = useState({
+    peopleReferred: 0,
+    donationsMobilized: 0,
+    rewards: 0,
+    livesImpacted: 0,
+  });
+  const [loadingStats, setLoadingStats] = useState(true);
 
-  const referralLink = `${window.location.origin}/donate?ref=${user?.id}`;
+  const referralLink = `${window.location.origin}/donate?ref=${user?.referralCode || user?.id}`;
+
+  // Fetch live stats from Supabase
+  useEffect(() => {
+    const loadStats = async () => {
+      if (!user) return;
+      setLoadingStats(true);
+      const data = await getReferralStats(user.id);
+      setStats(data);
+      setLoadingStats(false);
+    };
+    loadStats();
+  }, [user]);
 
   const copyLink = () => {
     navigator.clipboard.writeText(referralLink);
@@ -27,11 +47,11 @@ const VolunteerDashboard = () => {
     }
   };
 
-  const stats = [
-    { label: 'People Referred', value: '0', icon: Users, color: 'text-blue-500' },
-    { label: 'Donations Mobilized', value: '₦0', icon: TrendingUp, color: 'text-green-500' },
-    { label: 'Your Rewards', value: '₦0', icon: Award, color: 'text-gold' },
-    { label: 'Lives Impacted', value: '0', icon: Heart, color: 'text-red-500' },
+  const statCards = [
+    { label: 'People Referred', value: loadingStats ? '...' : `${stats.peopleReferred}`, icon: Users, color: 'text-blue-500' },
+    { label: 'Donations Mobilized', value: loadingStats ? '...' : formatNgn(stats.donationsMobilized), icon: TrendingUp, color: 'text-green-500' },
+    { label: 'Your Rewards', value: loadingStats ? '...' : formatNgn(stats.rewards), icon: Award, color: 'text-gold' },
+    { label: 'Lives Impacted', value: loadingStats ? '...' : `${stats.livesImpacted}`, icon: Heart, color: 'text-red-500' },
   ];
 
   const steps = [
@@ -67,7 +87,7 @@ const VolunteerDashboard = () => {
       <div className="bg-card border-b border-border">
         <div className="container mx-auto px-4 max-w-4xl py-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {stats.map(s => (
+            {statCards.map(s => (
               <div key={s.label} className="text-center p-4 bg-secondary/30 rounded-xl border border-border">
                 <s.icon className={`h-6 w-6 ${s.color} mx-auto mb-2`} />
                 <div className="font-heading text-xl font-bold text-navy dark:text-gold-light">{s.value}</div>
@@ -123,7 +143,7 @@ const VolunteerDashboard = () => {
           <p className="text-sm text-muted-foreground">Copy any of these ready-made messages with your link and paste into WhatsApp or SMS:</p>
           {[
             `🌟 Join me in supporting Enlighten Community — transforming lives through health, education & empowerment! Donate here: ${referralLink}`,
-            `💙 From sickness to wellness, from fear to faith! Help Enlighten Community reach more lives. Your donation makes a real difference: ${referralLink}`,
+            `💙 From sickness to wellness, fear to faith! Help Enlighten Community reach more lives. Your donation makes a real difference: ${referralLink}`,
           ].map((msg, i) => (
             <div key={i} className="bg-secondary/30 rounded-lg p-3 text-xs text-card-foreground leading-relaxed">
               <p className="mb-2">{msg}</p>

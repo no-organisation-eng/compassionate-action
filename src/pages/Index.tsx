@@ -69,7 +69,7 @@ const Index = () => {
             <span className="text-gold">One Community</span> at a Time
           </h1>
           <p className="text-gold/90 italic text-base md:text-lg mb-6 max-w-2xl leading-relaxed border-l-4 border-gold/50 pl-4">
-            From sickness to wellness, from fear to faith, from problems to solutions and from consumption to production!
+            From sickness to wellness, fear to faith, problems to solutions and from consumption to production!
           </p>
           <p className="text-lg md:text-xl text-gold-light/80 mb-10 max-w-2xl leading-relaxed">
             Since 2003, <span className="font-semibold text-gold-light">World Enlighten Organization</span> aka{" "}

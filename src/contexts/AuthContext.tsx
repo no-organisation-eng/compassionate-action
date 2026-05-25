@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, getCurrentUser, loginUser, registerUser, logoutUser } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
+import { User, profileToUser } from '@/lib/auth';
+import type { Profile } from '@/lib/database.types';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string, country: string, state: string) => Promise<void>;
+  register: (name: string, email: string, password: string, country: string, state: string, referrerCode?: string | null) => Promise<void>;
   logout: () => void;
 }
 
@@ -15,22 +17,112 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Listen for auth state changes and fetch profile
   useEffect(() => {
-    setUser(getCurrentUser());
-    setLoading(false);
+    // Check initial session
+    const initSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+        if (profile) setUser(profileToUser(profile as Profile));
+      }
+      setLoading(false);
+    };
+
+    initSession();
+
+    // Subscribe to auth changes (login, logout, token refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          // Small delay to allow the DB trigger to create the profile
+          await new Promise(r => setTimeout(r, 500));
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+          if (profile) setUser(profileToUser(profile as Profile));
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+        }
+      }
+    );
+
+    return () => { subscription.unsubscribe(); };
   }, []);
 
   const login = async (email: string, password: string) => {
-    const u = loginUser(email, password);
-    setUser(u);
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
+    });
+    if (error) throw new Error(error.message);
+    if (!data.user) throw new Error('Login failed. Please try again.');
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', data.user.id)
+      .single();
+    if (profile) setUser(profileToUser(profile as Profile));
   };
 
-  const register = async (name: string, email: string, password: string, country: string, state: string) => {
-    const u = registerUser(name, email, password, country, state);
-    setUser(u);
+  const register = async (
+    name: string, email: string, password: string,
+    country: string, state: string, referrerCode?: string | null,
+  ) => {
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim().toLowerCase(),
+      password,
+      options: {
+        data: { name: name.trim(), country, state },
+      },
+    });
+    if (error) throw new Error(error.message);
+    if (!data.user) throw new Error('Registration failed. Please try again.');
+
+    // Handle referral linking
+    if (referrerCode) {
+      // Wait a moment for the trigger to create the profile
+      await new Promise(r => setTimeout(r, 800));
+
+      const { data: referrer } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('referral_code', referrerCode)
+        .single();
+
+      if (referrer) {
+        await supabase
+          .from('profiles')
+          .update({ referred_by: referrer.id })
+          .eq('id', data.user.id);
+
+        await supabase
+          .from('referrals')
+          .insert({ referrer_id: referrer.id, referred_id: data.user.id });
+      }
+    }
+
+    // Fetch profile
+    await new Promise(r => setTimeout(r, 500));
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', data.user.id)
+      .single();
+    if (profile) setUser(profileToUser(profile as Profile));
   };
 
-  const logout = () => { logoutUser(); setUser(null); };
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
 
   return (
     <AuthContext.Provider value={{ user, loading, login, register, logout }}>

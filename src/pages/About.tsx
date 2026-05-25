@@ -89,7 +89,7 @@ const About = () => (
         <SectionHeading title="Get In Touch" subtitle="We'd love to hear from you." />
         <div className="flex flex-col items-center gap-3 mt-8 text-gold-light/80">
           <span className="flex items-center gap-2"><MapPin size={18} /> 7 Diamond Hill, Calabar</span>
-          <span className="flex items-center gap-2"><Phone size={18} /> +234 813 541 7227</span>
+          <span className="flex items-center gap-2"><Phone size={18} /> +234905237 6491</span>
           <span className="flex items-center gap-2"><Mail size={18} /> worldenlightenorganization@gmail.com</span>
           <a
             href="https://www.facebook.com/profile.php?id=100066570099602"

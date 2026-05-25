@@ -239,7 +239,7 @@ const Donate = () => {
       )}
       <div className="bg-gold/5 border border-gold/20 rounded-xl p-4 text-sm text-muted-foreground">
         <p><span className="font-bold text-navy dark:text-gold-light">{formatNgn(finalAmount * 0.9)}</span> goes directly to community projects.</p>
-        <p className="mt-1">From sickness to wellness, from fear to faith — thank you! 🙏</p>
+        <p className="mt-1">From sickness to wellness, fear to faith — thank you! 🙏</p>
       </div>
       <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
         <Button variant="gold" onClick={() => { setStep('amount'); setAmount(0); setCustomAmount(''); setName(''); setEmail(''); setPhone(''); setTxRef(''); }}>
