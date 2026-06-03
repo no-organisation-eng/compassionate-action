@@ -69,7 +69,7 @@ const Donate = () => {
   const handleSuccess = (ref: string) => { setTxRef(ref); setStep('success'); };
 
   /* ── Step 1: Amount ── */
-  const AmountStep = () => (
+  const renderAmountStep = () => (
     <div className="space-y-6">
       <div>
         <h3 className="font-heading font-bold text-lg text-navy dark:text-gold-light mb-4">Select an amount</h3>
@@ -129,7 +129,7 @@ const Donate = () => {
   );
 
   /* ── Step 2: Donor Details ── */
-  const DetailsStep = () => (
+  const renderDetailsStep = () => (
     <div className="space-y-5">
       <h3 className="font-heading font-bold text-lg text-navy dark:text-gold-light">Your information</h3>
       <div className="space-y-4">
@@ -160,7 +160,7 @@ const Donate = () => {
   );
 
   /* ── Step 3: Payment Method ── */
-  const PaymentStep = () => (
+  const renderPaymentStep = () => (
     <div className="space-y-6">
       <h3 className="font-heading font-bold text-lg text-navy dark:text-gold-light">
         Choose how to pay <span className="font-mono text-gold">({formatNgn(finalAmount)})</span>
@@ -219,7 +219,7 @@ const Donate = () => {
   );
 
   /* ── Step 4: Success ── */
-  const SuccessStep = () => (
+  const renderSuccessStep = () => (
     <div className="text-center space-y-6 py-6">
       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gold/10 border-4 border-gold/30 mx-auto">
         <CheckCircle2 className="h-10 w-10 text-gold" />
@@ -272,10 +272,10 @@ const Donate = () => {
         <div className="container mx-auto px-4 max-w-lg">
           <div className="bg-card rounded-2xl border border-border shadow-xl p-6 md:p-8">
             <StepBar current={step} />
-            {step === 'amount'  && <AmountStep />}
-            {step === 'details' && <DetailsStep />}
-            {step === 'payment' && <PaymentStep />}
-            {step === 'success' && <SuccessStep />}
+            {step === 'amount'  && renderAmountStep()}
+            {step === 'details' && renderDetailsStep()}
+            {step === 'payment' && renderPaymentStep()}
+            {step === 'success' && renderSuccessStep()}
           </div>
         </div>
       </section>
