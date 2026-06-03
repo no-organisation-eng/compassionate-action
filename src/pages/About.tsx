@@ -83,6 +83,32 @@ const About = () => (
       </div>
     </section>
 
+    {/* Community Structure */}
+    <section className="py-16 bg-muted/30">
+      <div className="container mx-auto px-4 max-w-4xl">
+        <SectionHeading title="Our Community Structure" />
+        <div className="space-y-4 text-muted-foreground leading-relaxed mt-8 text-center max-w-3xl mx-auto">
+          <p>
+            We are currently building our worldwide structure, continental structure, National Structures in all the Countries of the world chapters or volunteers across various geopolitical zones in Nigeria our founding country, including North Central, North East, North West, South East, South South, and South West. This enables us to respond to needs locally, while learning from diverse contexts and adapting our approaches to each community's unique priorities.
+          </p>
+          <p>
+            Our volunteer base is made up of dedicated individuals serving in national executive roles, regional coordinating positions, and grassroots implementation teams. Through this structure we are able achive accurate implementation of ideas, strategic management and accountability.
+          </p>
+          
+          <h3 className="font-heading text-xl font-bold text-foreground mt-8 mb-4">Join Us</h3>
+          <p>
+            Become part of our passionate community of trail blazers, visionaries, mentors, and changemakers committed to building ethical, service-oriented leaders across the Countries of the world to ensure humanity and biodiversity preservation. Whether you choose to volunteer, become a fellow, or support our projects, your contribution creates ripple effects that impact generations.
+          </p>
+          
+          <div className="pt-6">
+            <a href="/volunteers" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-gold text-gold-foreground hover:bg-gold/90 h-11 px-8 py-2">
+              Volunteers
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     {/* Contact Info */}
     <section className="py-16 gradient-navy text-gold-light">
       <div className="container mx-auto px-4 max-w-2xl text-center">

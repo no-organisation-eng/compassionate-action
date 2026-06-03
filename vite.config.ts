@@ -12,6 +12,19 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    proxy: {
+      // Proxy Supabase API calls to the local container
+      "/rest/v1": {
+        target: "http://127.0.0.1:54321",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/auth/v1": {
+        target: "http://127.0.0.1:54321",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   plugins: [react(), cloudflare()],
   resolve: {
