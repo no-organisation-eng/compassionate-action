@@ -72,15 +72,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (profile) setUser(profileToUser(profile as Profile));
   };
 
+  // Strip any character outside ISO-8859-1 range so the browser fetch API
+  // doesn't throw "String contains non ISO-8859-1 code point" when Supabase
+  // serialises user_metadata into request headers.
+  const toSafeAscii = (str: string) =>
+    str.replace(/[^\x00-\xFF]/g, '').trim();
+
   const register = async (
     name: string, email: string, password: string,
     country: string, state: string, referrerCode?: string | null,
   ) => {
+    const safeName    = toSafeAscii(name);
+    const safeCountry = toSafeAscii(country);
+    const safeState   = toSafeAscii(state);
+
     const { data, error } = await supabase.auth.signUp({
       email: email.trim().toLowerCase(),
       password,
       options: {
-        data: { name: name.trim(), country, state },
+        data: { name: safeName, country: safeCountry, state: safeState },
       },
     });
     if (error) throw new Error(error.message);
