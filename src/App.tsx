@@ -21,7 +21,9 @@ import Register from "./pages/Register";
 import Community from "./pages/Community";
 import Wellness from "./pages/Wellness";
 import VolunteerDashboard from "./pages/VolunteerDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
+import AdminRoute from "./components/AdminRoute";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +55,9 @@ const App = () => (
               } />
               <Route path="/volunteer/dashboard" element={
                 <ProtectedRoute><VolunteerDashboard /></ProtectedRoute>
+              } />
+              <Route path="/admin/dashboard" element={
+                <AdminRoute><AdminDashboard /></AdminRoute>
               } />
               <Route path="*" element={<NotFound />} />
             </Routes>

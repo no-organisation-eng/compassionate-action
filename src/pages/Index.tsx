@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Heart, BookOpen, Globe, Users, Sprout, Shield, GraduationCap, Handshake, Droplets, Lightbulb, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SectionHeading from "@/components/SectionHeading";
+import VolunteerAlbum from "@/components/VolunteerAlbum";
 import logo from "@/assets/logo.jpg";
 import hero1 from "@/assets/hero-1.png";
 import hero2 from "@/assets/hero-2.png";
@@ -133,6 +134,9 @@ const Index = () => {
         </div>
       </div>
     </section>
+
+    {/* Volunteer Album */}
+    <VolunteerAlbum />
 
     {/* CTA Banner */}
     <section className="gradient-navy py-16">

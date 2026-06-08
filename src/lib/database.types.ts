@@ -10,7 +10,23 @@ export interface Profile {
   state: string;
   referral_code: string;
   referred_by: string | null;
+  is_admin: boolean;
   created_at: string;
+}
+
+export interface Volunteer {
+  id: string;
+  profile_id: string;
+  tier: string;
+  status: string;
+  payment_status: string;
+  photo_url: string | null;
+  is_executive: boolean;
+  location_context: any;
+  created_at: string;
+  updated_at: string;
+  // Joined fields
+  profiles?: Profile;
 }
 
 export interface Post {
