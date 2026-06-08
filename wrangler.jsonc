@@ -8,5 +8,10 @@
   },
   "compatibility_flags": [
     "nodejs_compat"
-  ]
+  ],
+  "vars": {
+    "VITE_SUPABASE_URL": "https://vgcwtcjhhgyaneujvdal.supabase.co",
+    "VITE_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZnY3d0Y2poaGd5YW5ldWp2ZGFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3OTMxMjAsImV4cCI6MjA5MjM2OTEyMH0.uSRFrYk9yzJdo_zvtvC3hnCoY8IstjRxENpraNziEVw",
+    "VITE_FLW_PUBLIC_KEY": "FLWPUBK-f1596a2163a387afc48c776acbce0949-X"
+  }
 }

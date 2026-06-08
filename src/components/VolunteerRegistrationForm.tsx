@@ -80,7 +80,7 @@ const VolunteerRegistrationForm = () => {
   };
 
   const config = {
-    public_key: import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY || 'FLWPUBK_TEST-SANDBOX',
+    public_key: import.meta.env.VITE_FLW_PUBLIC_KEY || 'FLWPUBK_TEST-SANDBOX',
     tx_ref: Date.now().toString(),
     amount: selectedTier?.amount || 10000,
     currency: 'NGN',
