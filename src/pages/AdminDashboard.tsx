@@ -64,9 +64,9 @@ const AdminDashboard = () => {
         <h2 className="text-xl font-semibold mb-4">Volunteer Applications</h2>
         
         {loading ? (
-          <p>Loading...</p>
+          <p className="text-lg">Loading...</p>
         ) : (
-          <Table>
+          <Table className="text-base">
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>

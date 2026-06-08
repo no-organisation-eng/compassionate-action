@@ -200,6 +200,12 @@ const Navbar = () => {
                     className="flex items-center gap-2 px-4 py-2.5 text-sm text-card-foreground hover:bg-secondary transition-colors">
                     <LayoutDashboard className="h-4 w-4 text-gold" /> My Dashboard
                   </Link>
+                  {user.isAdmin && (
+                    <Link to="/admin/dashboard" onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-card-foreground hover:bg-secondary transition-colors">
+                      <LayoutDashboard className="h-4 w-4 text-gold" /> Admin Dashboard
+                    </Link>
+                  )}
                   <Link to="/community" onClick={() => setUserMenuOpen(false)}
                     className="flex items-center gap-2 px-4 py-2.5 text-sm text-card-foreground hover:bg-secondary transition-colors">
                     <Heart className="h-4 w-4 text-gold" /> Community Hub
@@ -285,6 +291,12 @@ const Navbar = () => {
                   className="flex items-center gap-2 text-sm font-medium text-gold-light/80 hover:text-gold">
                   <LayoutDashboard className="h-4 w-4 text-gold" /> My Dashboard
                 </Link>
+                {user.isAdmin && (
+                  <Link to="/admin/dashboard" onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 text-sm font-medium text-gold-light/80 hover:text-gold">
+                    <LayoutDashboard className="h-4 w-4 text-gold" /> Admin Dashboard
+                  </Link>
+                )}
                 <button onClick={handleLogout}
                   className="flex items-center gap-2 text-sm text-destructive font-medium">
                   <LogOut className="h-4 w-4" /> Sign Out
