@@ -17,17 +17,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Helper to fetch profile with retries (for registration delay)
+  const fetchProfileWithRetry = async (userId: string, retries = 5) => {
+    for (let i = 0; i < retries; i++) {
+      const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
+      if (data) return data;
+      await new Promise(r => setTimeout(r, 600)); // wait 600ms before retry
+    }
+    throw new Error("Profile creation timeout. Please refresh or try logging in.");
+  };
+
   // Listen for auth state changes and fetch profile
   useEffect(() => {
-    // Check initial session
     const initSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
+        const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
         if (profile) setUser(profileToUser(profile as Profile));
       }
       setLoading(false);
@@ -35,18 +40,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     initSession();
 
-    // Subscribe to auth changes (login, logout, token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
-          // Small delay to allow the DB trigger to create the profile
-          await new Promise(r => setTimeout(r, 500));
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-          if (profile) setUser(profileToUser(profile as Profile));
+          // Only auto-fetch if user isn't already set
+          setUser(prev => {
+            if (!prev) {
+              supabase.from('profiles').select('*').eq('id', session.user.id).single().then(({ data }) => {
+                if (data) setUser(profileToUser(data as Profile));
+              });
+            }
+            return prev;
+          });
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
         }
@@ -64,19 +69,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (error) throw new Error(error.message);
     if (!data.user) throw new Error('Login failed. Please try again.');
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', data.user.id)
-      .single();
-    if (profile) setUser(profileToUser(profile as Profile));
+    const profile = await fetchProfileWithRetry(data.user.id, 2);
+    setUser(profileToUser(profile as Profile));
   };
 
   // Strip any character outside ISO-8859-1 range so the browser fetch API
   // doesn't throw "String contains non ISO-8859-1 code point" when Supabase
   // serialises user_metadata into request headers.
-  const toSafeAscii = (str: string) =>
-    str.replace(/[^\x00-\xFF]/g, '').trim();
+  const toSafeAscii = (str: string) => str.replace(/[^\x00-\xFF]/g, '').trim();
 
   const register = async (
     name: string, email: string, password: string,
@@ -100,33 +100,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (referrerCode) {
       // Wait a moment for the trigger to create the profile
       await new Promise(r => setTimeout(r, 800));
-
-      const { data: referrer } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('referral_code', referrerCode)
-        .single();
-
+      const { data: referrer } = await supabase.from('profiles').select('id').eq('referral_code', referrerCode).single();
       if (referrer) {
-        await supabase
-          .from('profiles')
-          .update({ referred_by: referrer.id })
-          .eq('id', data.user.id);
-
-        await supabase
-          .from('referrals')
-          .insert({ referrer_id: referrer.id, referred_id: data.user.id });
+        await supabase.from('profiles').update({ referred_by: referrer.id }).eq('id', data.user.id);
+        await supabase.from('referrals').insert({ referrer_id: referrer.id, referred_id: data.user.id });
       }
     }
 
-    // Fetch profile
-    await new Promise(r => setTimeout(r, 500));
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', data.user.id)
-      .single();
-    if (profile) setUser(profileToUser(profile as Profile));
+    // Fetch profile (retries if the trigger is slow)
+    const profile = await fetchProfileWithRetry(data.user.id, 5);
+    setUser(profileToUser(profile as Profile));
   };
 
   const logout = async () => {

@@ -5,11 +5,12 @@ import SectionHeading from '@/components/SectionHeading';
 
 interface Video {
   id: string; title: string; description: string;
-  category: string; duration: string; youtubeId: string;
+  category: string; duration: string; youtubeId?: string; embedUrl?: string;
   gradient: string; Icon: React.ElementType;
 }
 
 const videos: Video[] = [
+  { id: 'v0', title: 'African Traditional Medicine & Global Relevance', description: "An overview of the organization's definition of traditional medicine, and the global relevance of African Traditional Medicine.", category: 'Wellness', duration: 'Intro', embedUrl: 'https://app.heygen.com/embeds/406b3aa556444aa09541ae28d8eeb676', gradient: 'from-orange-600 to-amber-800', Icon: Leaf },
   { id: 'v1', title: 'Managing Stress & Anxiety Daily', description: 'Learn practical breathing techniques and mindfulness strategies to calm your nervous system and reduce stress in everyday life.', category: 'Mental Health', duration: '18:24', youtubeId: 'YMyofREc5Jk', gradient: 'from-purple-600 to-indigo-700', Icon: Brain },
   { id: 'v2', title: 'Plant-Based Nutrition Basics', description: 'A beginner-friendly guide to understanding plant-based diets, how they support immunity, and simple meal ideas on a budget.', category: 'Nutrition', duration: '22:11', youtubeId: 'dOhEbcQ_bKE', gradient: 'from-green-600 to-teal-700', Icon: Leaf },
   { id: 'v3', title: 'Morning Exercise for Beginners', description: '15-minute energizing morning workout that requires no equipment. Perfect for all fitness levels to build a daily health habit.', category: 'Fitness', duration: '15:00', youtubeId: 'gC_L9qAHVJ8', gradient: 'from-orange-500 to-red-600', Icon: Dumbbell },
@@ -98,9 +99,9 @@ const Wellness = () => {
                         onClick={() => setPlaying(video)}>
                         <Play className="h-3 w-3" /> Watch Free
                       </Button>
-                      <a href={`https://www.youtube.com/watch?v=${video.youtubeId}`} target="_blank" rel="noopener noreferrer">
+                      <a href={video.youtubeId ? `https://www.youtube.com/watch?v=${video.youtubeId}` : video.embedUrl} target="_blank" rel="noopener noreferrer">
                         <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs border-gold/30 hover:bg-gold/10">
-                          <Download className="h-3 w-3" /> Save
+                          {video.youtubeId ? <><Download className="h-3 w-3" /> Save</> : <><Play className="h-3 w-3" /> Open</>}
                         </Button>
                       </a>
                     </div>
@@ -136,16 +137,18 @@ const Wellness = () => {
               </button>
             </div>
             <div className="aspect-video bg-black">
-              <iframe className="w-full h-full" src={`https://www.youtube.com/embed/${playing.youtubeId}?autoplay=1&rel=0`}
+              <iframe className="w-full h-full" src={playing.youtubeId ? `https://www.youtube.com/embed/${playing.youtubeId}?autoplay=1&rel=0` : playing.embedUrl}
                 title={playing.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen />
             </div>
             <div className="p-5">
               <p className="text-sm text-muted-foreground leading-relaxed">{playing.description}</p>
-              <div className="flex gap-3 mt-4">
-                <a href={`https://www.youtube.com/watch?v=${playing.youtubeId}`} target="_blank" rel="noopener noreferrer" className="flex-1">
-                  <Button variant="outline" className="w-full flex items-center gap-2 border-gold/30"><Download className="h-4 w-4" /> Download from YouTube</Button>
-                </a>
+              <div className="flex gap-3 mt-4 justify-end">
+                {playing.youtubeId && (
+                  <a href={`https://www.youtube.com/watch?v=${playing.youtubeId}`} target="_blank" rel="noopener noreferrer" className="flex-1">
+                    <Button variant="outline" className="w-full flex items-center gap-2 border-gold/30"><Download className="h-4 w-4" /> Download from YouTube</Button>
+                  </a>
+                )}
                 <Button variant="gold" onClick={() => setPlaying(null)}>Close</Button>
               </div>
             </div>
