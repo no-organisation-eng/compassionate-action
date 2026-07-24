@@ -24,6 +24,7 @@ const VolunteerRegistrationForm = () => {
   const [locationDetails, setLocationDetails] = useState('');
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   const selectedTier = TIERS.find((t) => t.name === tier);
 
@@ -39,13 +40,32 @@ const VolunteerRegistrationForm = () => {
   const handlePaymentSuccess = async (response: any) => {
     try {
       setLoading(true);
-      let photo_url = null;
+      // Update payment status to Paid
+      const { error } = await supabase.from('volunteers').update({
+        payment_status: 'Paid',
+      }).eq('profile_id', user?.id);
 
-      // Upload photo if exists
-      if (photoFile && user) {
+      if (error) throw error;
+
+      toast.success('Registration successful! Awaiting admin approval.');
+      setStep(4); // Success step
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update payment status');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const processRegistrationAndPay = async () => {
+    try {
+      setLoading(true);
+      let currentPhotoUrl = photoUrl;
+
+      // Upload photo if not already uploaded
+      if (photoFile && user && !currentPhotoUrl) {
         const fileExt = photoFile.name.split('.').pop();
         const fileName = `${user.id}-${Math.random()}.${fileExt}`;
-        const { error: uploadError, data } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('volunteer_photos')
           .upload(fileName, photoFile);
 
@@ -55,25 +75,39 @@ const VolunteerRegistrationForm = () => {
           .from('volunteer_photos')
           .getPublicUrl(fileName);
         
-        photo_url = publicUrl;
+        currentPhotoUrl = publicUrl;
+        setPhotoUrl(currentPhotoUrl);
       }
 
-      // Save volunteer record
-      const { error } = await supabase.from('volunteers').insert({
+      // Upsert volunteer record as Pending payment
+      const { error } = await supabase.from('volunteers').upsert({
         profile_id: user?.id,
         tier: tier,
-        payment_status: 'Paid',
+        payment_status: 'Pending',
         status: 'Pending',
-        photo_url: photo_url,
+        photo_url: currentPhotoUrl,
         location_context: { details: locationDetails }
-      });
+      }, { onConflict: 'profile_id' });
 
       if (error) throw error;
 
-      toast.success('Registration successful! Awaiting admin approval.');
-      setStep(4); // Success step
+      // Open Flutterwave payment modal
+      handleFlutterPayment({
+        callback: (response) => {
+          closePaymentModal();
+          if (response.status === 'successful') {
+            handlePaymentSuccess(response);
+          } else {
+            toast.error('Payment was not successful.');
+          }
+        },
+        onClose: () => {
+          toast.info('Payment window closed.');
+        },
+      });
+
     } catch (err: any) {
-      toast.error(err.message || 'Registration failed');
+      toast.error(err.message || 'Failed to initiate registration');
     } finally {
       setLoading(false);
     }
@@ -177,21 +211,7 @@ const VolunteerRegistrationForm = () => {
               className="w-full" 
               variant="gold"
               disabled={loading}
-              onClick={() => {
-                handleFlutterPayment({
-                  callback: (response) => {
-                    closePaymentModal();
-                    if (response.status === 'successful') {
-                      handlePaymentSuccess(response);
-                    } else {
-                      toast.error('Payment was not successful.');
-                    }
-                  },
-                  onClose: () => {
-                    toast.info('Payment window closed.');
-                  },
-                });
-              }}
+              onClick={processRegistrationAndPay}
             >
               {loading ? 'Processing...' : 'Pay with Flutterwave'}
             </Button>

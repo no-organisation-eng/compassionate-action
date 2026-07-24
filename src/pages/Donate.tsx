@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { toast } from "sonner";
 import {
   Heart, Droplets, GraduationCap, Users, ShieldCheck, Eye, Handshake,
   CreditCard, Bitcoin, ArrowRight, ArrowLeft, CheckCircle2, Sparkles
@@ -62,6 +63,15 @@ const Donate = () => {
   const [phone, setPhone] = useState('');
   const [method, setMethod] = useState<Method>('flutterwave');
   const [txRef, setTxRef] = useState('');
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.message) {
+      toast.error(location.state.message);
+      // Clear the state so it doesn't keep toasting on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   const refCode = getReferralCode();
   const finalAmount = amount || parseInt(customAmount) || 0;

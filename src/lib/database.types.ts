@@ -11,6 +11,7 @@ export interface Profile {
   referral_code: string;
   referred_by: string | null;
   is_admin: boolean;
+  is_evicted?: boolean;
   created_at: string;
 }
 

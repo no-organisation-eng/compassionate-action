@@ -13,6 +13,7 @@ export interface User {
   avatar: string;
   referralCode: string;
   isAdmin: boolean;
+  isEvicted: boolean;
 }
 
 /** Convert a Supabase profile row into the app's User shape */
@@ -27,6 +28,7 @@ export const profileToUser = (p: Profile): User => ({
   avatar: p.avatar,
   referralCode: p.referral_code,
   isAdmin: !!p.is_admin,
+  isEvicted: !!p.is_evicted,
 });
 
 /** Get the currently authenticated user + their profile */

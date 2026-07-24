@@ -17,6 +17,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
+
+  if (user.isEvicted) {
+    return <Navigate to="/donate" state={{ message: "Your account has been restricted. Please make a donation to restore your access." }} replace />;
+  }
+
   return <>{children}</>;
 };
 
